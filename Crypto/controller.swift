@@ -4,14 +4,19 @@
 //
 //  Created by Aleksandr Alekseev on 21.04.2024.
 //
-
+import SwiftUI
+import SwiftUICharts
+import WebKit
 import Foundation
 
 // Объект Модель
-struct DataModel {
+struct ChartDataModel: Identifiable {
+    var id: Int
     var data: [Double]
+    var color: Color
+    var title: String
+    var legend: String
 }
-
 struct User: Codable, Identifiable {
     var id: Int
     var name: String

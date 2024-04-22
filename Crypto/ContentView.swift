@@ -23,13 +23,11 @@ struct BarView: View {
 
 
 struct BarChartView: View {
-    var data: [Double]
-    var colors: [Color]
-    var title: String
+    var chartData: ChartDataModel
     
     var transformedData: [Double] {
-        let min = data.min() ?? 0.0
-        return data.map { $0 + abs(min) + 5.0 }
+        let min = chartData.data.min() ?? 0.0
+        return chartData.data.map { $0 + abs(min) + 5.0 }
     }
     
     var highestData: Double {
@@ -41,7 +39,7 @@ struct BarChartView: View {
     var body: some View {
         VStack {
             HStack {
-                Text(title)
+                Text(chartData.title)
                     .font(.system(size: 16))
                     .minimumScaleFactor(0.1)
                 Spacer()
@@ -58,7 +56,7 @@ struct BarChartView: View {
                         
                         VStack(spacing: 2) {
                             Rectangle()
-                                .fill(LinearGradient(gradient: Gradient(colors: colors), startPoint: .bottom, endPoint: .top))
+                                .fill(LinearGradient(gradient: Gradient(colors: [chartData.color,Color.red]), startPoint: .bottom, endPoint: .top))
                                 .opacity(transformedData[index] == 0.0 ? 0.0 : 0.8 )
                                 .frame(width: barWidth, height: height, alignment: .bottom)
                             
@@ -114,17 +112,14 @@ struct CustomLineChartView: View {
     }
 }
 struct lineviewchart: View {
-    var data: [Double]
-    var title: String
-    var legend: String
-    var color: Color
+    var chartData: ChartDataModel
     
     var body: some View {
         CustomLineChartView(
-            data: data,
-            title: title,
-            legend: legend,
-            color: color
+            data: chartData.data,
+            title: chartData.title,
+            legend: chartData.legend,
+            color: chartData.color
         )
     }
 }
@@ -139,17 +134,24 @@ struct FirstContentView: View {
     @State private var graphColor1 = Color.red
     @State private var graphColor2 = Color.blue
     
+    @State private var chartData1 = ChartDataModel(id: 1, data: generateRandomWalk_exp(steps: size_of_data, disp: my_disp, last_n_elem: my_last_n_elem), color: Color.blue, title: "Random Walk 1", legend: "Line Chart 1")
+    @State private var chartData2 = ChartDataModel(id: 2, data: generateRandomWalk(steps: size_of_data), color: Color.red, title: "Random Walk 2", legend: "Line Chart 2")
+    @State private var chartData3 = ChartDataModel(id: 3, data: generateRandomWalk_exp(steps: size_of_data, disp: my_disp, last_n_elem: my_last_n_elem), color: Color.green, title: "Random Walk 2", legend: "Line Chart 3")
+    
     var body: some View {
         GeometryReader { geometry in
             ScrollView {
                 VStack {
-                    lineviewchart(data: self.data1, title: "Exp Process 1", legend: "Random Walk 1", color: .red).frame(height: geometry.size.height*0.30)
-                    lineviewchart(data: self.data2, title: "Wiener Process 1", legend: "Random Walk 2", color: .red).frame(height: geometry.size.height*0.30)
-                    lineviewchart(data: self.data3, title: "Exp Process 1", legend: "Random Walk 3", color: .red).frame(height: geometry.size.height*0.30)
+                    lineviewchart(chartData: self.chartData1).frame(height: geometry.size.height*0.30)
+                    lineviewchart(chartData: self.chartData2).frame(height: geometry.size.height*0.30)
+                    lineviewchart(chartData: self.chartData3).frame(height: geometry.size.height*0.30)
                     Button("Take Data") {
                         self.data1 = generateRandomWalk_exp(steps: size_of_data, disp:self.dispValue)
                         self.data2 = generateRandomWalk(steps: size_of_data)
                         self.data3 = generateRandomWalk_exp(steps: size_of_data, disp:self.dispValue)
+                        chartData1 = ChartDataModel(id: 1, data: data1, color: Color.blue, title: "Random Walk 1", legend: "Line Chart 1")
+                        chartData2 = ChartDataModel(id: 2, data: data2, color: Color.red, title: "Random Walk 2", legend: "Line Chart 2")
+                        chartData3 = ChartDataModel(id: 3, data: data3, color: Color.green, title: "Random Walk 2", legend: "Line Chart 3")
                     }
                     .padding([.horizontal, .bottom])
                     .frame(maxWidth: .infinity)
@@ -163,11 +165,10 @@ struct FirstContentView: View {
 }//FirstContentView
 
 struct SecondContentView: View {
-    @State private var dispValue: Double = my_disp
-    @State private var data1: [Double] = generateRandomWalk_exp(steps: 9,disp:200*my_disp,last_n_elem:my_last_n_elem)
-    @State private var data2: [Double] = generateRandomWalk_exp(steps: 9,disp:200*my_disp,last_n_elem:my_last_n_elem)
-    @State private var data3: [Double] = generateRandomWalk_exp(steps: 9,disp:200*my_disp,last_n_elem:my_last_n_elem)
-    
+    @State private var chartData1: ChartDataModel = ChartDataModel(id: 1, data: generateRandomWalk_exp(steps: 9,disp:200*my_disp,last_n_elem:my_last_n_elem), color: .blue, title: "Bar Chart 1", legend: "Random Walk 1")
+    @State private var chartData2: ChartDataModel = ChartDataModel(id: 2, data: generateRandomWalk_exp(steps: 9,disp:200*my_disp,last_n_elem:my_last_n_elem), color: .red, title: "Bar Chart 2", legend: "Random Walk 2")
+    @State private var chartData3: ChartDataModel = ChartDataModel(id: 3, data: generateRandomWalk_exp(steps: 9,disp:200*my_disp,last_n_elem:my_last_n_elem), color: .purple, title: "Bar Chart 3", legend: "Random Walk 3")
+
     // Создадим массив, содержащий различные цвета.
     let colors: [Color] = [.red, .green, .blue, .orange, .purple, .pink]
     @State private var selectedColors: [Color] = [.red, .blue]
@@ -175,19 +176,19 @@ struct SecondContentView: View {
     var body: some View {
         VStack {
             HStack {
-                BarChartView(data: data1.map { CGFloat($0) }, colors: selectedColors,title:"1 Title")
-                BarChartView(data: data2.map { CGFloat($0) }, colors: selectedColors,title:"2 Title")
+                BarChartView(chartData: chartData1)
+                BarChartView(chartData: chartData2)
             }
             GeometryReader { geometry in
-                BarChartView(data: data3.map { CGFloat($0) }, colors: selectedColors,title:"3 Title")
+                BarChartView(chartData: chartData3)
                     .frame(height: geometry.size.height/2)
             }
             
             HStack {
                 Button("Take Data") {
-                    self.data1 = generateRandomWalk_exp(steps: 9,disp:self.dispValue*200)
-                    self.data2 = generateRandomWalk_exp(steps: 9,disp:self.dispValue*200)
-                    self.data3 = generateRandomWalk_exp(steps: 9,disp:self.dispValue*200)
+                    chartData1 = ChartDataModel(id: 1, data: generateRandomWalk_exp(steps: 9,disp:200*my_disp,last_n_elem:my_last_n_elem), color: .blue, title: "Bar Chart 1", legend: "Random Walk 1")
+                    chartData2 = ChartDataModel(id: 2, data: generateRandomWalk_exp(steps: 9,disp:200*my_disp,last_n_elem:my_last_n_elem), color: .red, title: "Bar Chart 2", legend: "Random Walk 2")
+                    chartData3 = ChartDataModel(id: 3, data: generateRandomWalk_exp(steps: 9,disp:200*my_disp,last_n_elem:my_last_n_elem), color: .purple, title: "Bar Chart 3", legend: "Random Walk 3")
                 }
                 .padding(.vertical)
                 .padding()
@@ -197,13 +198,9 @@ struct SecondContentView: View {
                 
                 // Кнопка для генерации случайных цветов
                 Button("Generate Random Colors") {
-                    var index1: Int
-                    var index2: Int
-                    repeat {
-                        index1 = Int.random(in: 0..<colors.count)
-                        index2 = Int.random(in: 0..<colors.count)
-                    } while index1 == index2
-                    self.selectedColors = [colors[index1], colors[index2]]
+                    self.chartData1.color = colors[Int.random(in: 0..<colors.count)]
+                    self.chartData2.color = colors[Int.random(in: 0..<colors.count)]
+                    self.chartData3.color = colors[Int.random(in: 0..<colors.count)]
                 }
                 .padding(.vertical)
                 .padding(.vertical)
@@ -217,7 +214,6 @@ struct SecondContentView: View {
         .padding()
     }
 }
-
 
 
 struct ThirdContentView: View {

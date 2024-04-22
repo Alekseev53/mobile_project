@@ -76,7 +76,7 @@ struct LoginView: View {
 
 @main
 struct CryptoApp: App {
-    @State private var isLoggedIn = false
+    @State private var isLoggedIn = true
     
     var body: some Scene {
         WindowGroup {
